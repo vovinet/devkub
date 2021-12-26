@@ -342,7 +342,7 @@ $ curl -k -v --cacert ca.crt -H "Authorization: Bearer $TOKEN" https://10.10.10.
 * Connection #0 to host 10.10.10.133 left intact
 ```
 
-3. Масштабируем наше приложение  
+**3. Масштабируем наше приложение**  
   
 Имеем 2 реплики нашего приложения
 ```
