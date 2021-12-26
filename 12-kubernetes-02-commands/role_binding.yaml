@@ -1,0 +1,13 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: app-user
+  namespace: app-namespace
+subjects:
+- kind: ServiceAccount
+  name: app-user
+  namespace: app-namespace
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: logs-describe-role
