@@ -358,7 +358,7 @@ hello-minikube-5d9b964bfb-kld6s   1/1     Running   0               11s
 
 Увеличиваем число реплик до 5
 ```
-$ kubectl scale --replicas=2 deployment/hello-minikube  
+$ kubectl scale --replicas=5 deployment/hello-minikube  
 deployment.apps/hello-minikube scaled  
 ```
 
