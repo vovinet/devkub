@@ -10,7 +10,7 @@
 
 ## 2. Подготовить и проверить инвентарь для кластера в YC
 
-Развертываю на серверах YC. 
+Развертываю на серверах YC. [Скриншот](kubespray_ansible.png)
 ```
 ansible-playbook -i inventory/mycluster/hosts.yaml -b cluster.yml
 
@@ -44,7 +44,6 @@ etcd : Configure | Ensure etcd is running --------------------------------------
 download : download_container | Download image if required -------------------------------------------------------------------------------------------- 6.15s
 download : download_container | Download image if required -------------------------------------------------------------------------------------------- 5.98s
 ```
-![Скриншот](kubespray_ansible.png)
 
 Далее на хосте проверяю:
 ```
