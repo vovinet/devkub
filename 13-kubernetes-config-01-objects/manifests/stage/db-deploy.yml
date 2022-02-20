@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-stage
+  namespace: my-app-stage
+spec:
+  ports:
+    - name: web
+      port: 5432
+  selector:
+    app: db-stage
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-app-stage-dbdata
+  namespace: my-app-stage
+  labels:
+    type: local
+spec:
+  storageClassName: my-app-stage-stor
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/my-app-stage/db-data"
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-stage
+  namespace: my-app-stage
+spec:
+  selector:
+    matchLabels:
+      app: db-stage
+  serviceName: "db-stage"
+  replicas: 1
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: db-stage
+    spec:
+      containers:
+        - image: postgres:13-alpine
+          imagePullPolicy: IfNotPresent
+          name: db
+          env:
+          - name: POSTGRES_PASSWORD
+            value: "postgres"
+          - name: POSTGRES_USER
+            value: "postgres"
+          - name: POSTGRES_DB
+            value: "news"
+          volumeMounts:
+          - name: db-data
+            mountPath: /var/db
+      terminationGracePeriodSeconds: 30
+  volumeClaimTemplates:
+  - metadata:
+      name: db-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: my-app-stage-stor
+      resources:
+        requests:
+          storage: 1Gi

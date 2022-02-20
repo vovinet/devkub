@@ -1,0 +1,13 @@
+apiVersion: extensions/v1
+kind: Ingress
+metadata:
+  name: ingress-my-app
+  namespace: my-app-stage
+spec:
+  rules:
+  - host: my-app.int.zubarev.su
+    http:
+      paths:
+      - backend:
+          serviceName: my-app
+          servicePort: 8080

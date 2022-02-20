@@ -1,0 +1,25 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: geocoder-svc
+spec:
+  ports:
+    - name: web
+      protocol: TCP
+      port: 80
+      targetPort: 80
+
+# open.mapquestapi.com
+# http://open.mapquestapi.com/geocoding/v1/address?key=KEY&location=1600+Pennsylvania+Ave+NW,Washington,DC,20500
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: geocoder-svc
+subsets: 
+  - addresses:
+        - ip: 52.202.62.77
+    ports:
+      - port: 80
+        name: web

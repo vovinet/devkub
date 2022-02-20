@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-prod
+  namespace: my-app-prod
+spec:
+  selector:
+    matchLabels:
+      app: my-app-db-prod
+  serviceName: "my-app-db-prod"
+  replicas: 1
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: my-app-db-prod
+    spec:
+      containers:
+        - image: postgres:13-alpine
+          imagePullPolicy: IfNotPresent
+          name: db
+          env:
+          - name: POSTGRES_PASSWORD
+            value: "postgres"
+          - name: POSTGRES_USER
+            value: "postgres"
+          - name: POSTGRES_DB
+            value: "news"
+          volumeMounts:
+          - name: my-app-db-prod
+            mountPath: /var/db
+      terminationGracePeriodSeconds: 30
+  volumeClaimTemplates:
+  - metadata:
+      name: my-app-db-prod
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: csi-rbd-sc
+      resources:
+        requests:
+          storage: 5Gi
