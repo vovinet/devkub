@@ -1,0 +1,33 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-app-frontend-prod
+  name: my-app-frontend-prod
+  namespace: my-app-prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app-frontend-prod
+  template:
+    metadata:
+      labels:
+        app: my-app-frontend-prod
+    spec:
+      containers:
+      - image: vovinet/13-kubernetes-config_frontend
+        imagePullPolicy: IfNotPresent
+        name: frontend
+        envFrom:
+        - configMapRef:
+            name: cs-frontend
+        volumeMounts:
+        - mountPath: /static
+          name: static
+      volumes:  
+      - name: static
+        persistentVolumeClaim:
+          claimName: my-app-prod-pvc
+      terminationGracePeriodSeconds: 30

@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cs-frontend
+  namespace: my-app-prod
+data:
+  BASE_URL: http://my-app-backend:9000
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cs-backend
+  namespace: my-app-prod
+data:
+  DATABASE_URL: postgres://postgres:postgres@db-prod:5432/news

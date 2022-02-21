@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-prod
+  namespace: my-app-prod
+spec:
+  ports:
+    - name: web
+      port: 5432
+  selector:
+    app: my-app-db-prod
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-frontend-prod
+  namespace: my-app-prod
+spec:
+  ports:
+    - name: web
+      port: 8000
+      targetPort: 80
+  selector:
+    app: my-app-frontend-prod
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-backend
+  namespace: my-app-prod
+spec:
+  ports:
+    - name: backend
+      port: 9000
+  selector:
+    app: my-app-backend-prod
