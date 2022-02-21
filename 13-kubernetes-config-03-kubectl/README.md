@@ -111,6 +111,17 @@ Password:
 ![13-3-2.png](13-3-2.png)
 
 ## Задание 2: ручное масштабирование
+
+Начальное состояние:
+```
+$ kubectl get po -o wide
+NAME                                    READY   STATUS    RESTARTS      AGE   IP             NODE    NOMINATED NODE   READINESS GATES
+db-prod-0                               1/1     Running   1 (79m ago)   12h   10.233.92.25   node3   <none>           <none>
+my-app-backend-prod-767d944b6d-xrldz    1/1     Running   0             37m   10.233.96.21   node2   <none>           <none>
+my-app-frontend-prod-5c499fcf8b-n6q86   1/1     Running   0             37m   10.233.90.13   node1   <none>           <none>
+nfs-server-nfs-server-provisioner-0     1/1     Running   0             38m   10.233.90.12   node1   <none>           <none>
+```
+Масштабируемся:
 ```
 $ kubectl scale deployment my-app-backend-prod --replicas=3
 deployment.apps/my-app-backend-prod scaled
@@ -127,6 +138,23 @@ my-app-frontend-prod-5c499fcf8b-ck7qk   1/1     Running   0              22s    
 my-app-frontend-prod-5c499fcf8b-fsm6p   1/1     Running   0              22s    10.233.92.30   node3   <none>           <none>
 my-app-frontend-prod-5c499fcf8b-n6q86   1/1     Running   0              115m   10.233.90.13   node1   <none>           <none>
 nfs-server-nfs-server-provisioner-0     1/1     Running   0              116m   10.233.90.12   node1   <none>           <none>
+```
+
+Снова масштабируется до 1 реплики:
+```
+$ kubectl scale deployment my-app-frontend-prod --replicas=1
+deployment.apps/my-app-frontend-prod scaled
+$ kubectl scale deployment my-app-backend-prod --replicas=1
+deployment.apps/my-app-backend-prod scaled
+```
+Наблюдаем, что свежезапущенные поды завершились, а остались наши "старожилы"
+```
+$ kubectl get po -o wide
+NAME                                    READY   STATUS    RESTARTS       AGE    IP             NODE    NOMINATED NODE   READINESS GATES
+db-prod-0                               1/1     Running   1 (162m ago)   13h    10.233.92.25   node3   <none>           <none>
+my-app-backend-prod-767d944b6d-xrldz    1/1     Running   0              120m   10.233.96.21   node2   <none>           <none>
+my-app-frontend-prod-5c499fcf8b-n6q86   1/1     Running   0              120m   10.233.90.13   node1   <none>           <none>
+nfs-server-nfs-server-provisioner-0     1/1     Running   0              121m   10.233.90.12   node1   <none>           <none>
 
 $ kubectl describe pod
 Name:         db-prod-0
@@ -192,130 +220,6 @@ Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists fo
 Events:                      <none>
 
 
-Name:         my-app-backend-prod-767d944b6d-sm9cm
-Namespace:    my-app-prod
-Priority:     0
-Node:         node3/10.10.10.23
-Start Time:   Mon, 21 Feb 2022 13:47:51 +0300
-Labels:       app=my-app-backend-prod
-              pod-template-hash=767d944b6d
-Annotations:  cni.projectcalico.org/containerID: 3e9ae12479a8fe5746f184e9fd0aab33afa61742302c3603872f53441ab4027a
-              cni.projectcalico.org/podIP: 10.233.92.29/32
-              cni.projectcalico.org/podIPs: 10.233.92.29/32
-Status:       Running
-IP:           10.233.92.29
-IPs:
-  IP:           10.233.92.29
-Controlled By:  ReplicaSet/my-app-backend-prod-767d944b6d
-Containers:
-  backend:
-    Container ID:   containerd://d3e93c29e5e19eff7fb532b05675786296ad035f74e8bed6255797dc4878a9da
-    Image:          vovinet/13-kubernetes-config_backend
-    Image ID:       docker.io/vovinet/13-kubernetes-config_backend@sha256:c2a2a7c0f8207f5b36ced83547e1f7c2b290d1112ae0fff49c22eb80e5502be8
-    Port:           <none>
-    Host Port:      <none>
-    State:          Running
-      Started:      Mon, 21 Feb 2022 13:47:52 +0300
-    Ready:          True
-    Restart Count:  0
-    Environment Variables from:
-      cs-backend  ConfigMap  Optional: false
-    Environment:  <none>
-    Mounts:
-      /static from static (rw)
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-7jg84 (ro)
-Conditions:
-  Type              Status
-  Initialized       True 
-  Ready             True 
-  ContainersReady   True 
-  PodScheduled      True 
-Volumes:
-  static:
-    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
-    ClaimName:  my-app-prod-pvc
-    ReadOnly:   false
-  kube-api-access-7jg84:
-    Type:                    Projected (a volume that contains injected data from multiple sources)
-    TokenExpirationSeconds:  3607
-    ConfigMapName:           kube-root-ca.crt
-    ConfigMapOptional:       <nil>
-    DownwardAPI:             true
-QoS Class:                   BestEffort
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type    Reason     Age   From               Message
-  ----    ------     ----  ----               -------
-  Normal  Scheduled  88s   default-scheduler  Successfully assigned my-app-prod/my-app-backend-prod-767d944b6d-sm9cm to node3
-  Normal  Pulled     88s   kubelet            Container image "vovinet/13-kubernetes-config_backend" already present on machine
-  Normal  Created    88s   kubelet            Created container backend
-  Normal  Started    87s   kubelet            Started container backend
-
-
-Name:         my-app-backend-prod-767d944b6d-t8llv
-Namespace:    my-app-prod
-Priority:     0
-Node:         node1/10.10.10.21
-Start Time:   Mon, 21 Feb 2022 13:47:51 +0300
-Labels:       app=my-app-backend-prod
-              pod-template-hash=767d944b6d
-Annotations:  cni.projectcalico.org/containerID: 8188f4e698e4d3f7ff258c87945f13d626a1feb16fd77917f7994825c9c9e93f
-              cni.projectcalico.org/podIP: 10.233.90.15/32
-              cni.projectcalico.org/podIPs: 10.233.90.15/32
-Status:       Running
-IP:           10.233.90.15
-IPs:
-  IP:           10.233.90.15
-Controlled By:  ReplicaSet/my-app-backend-prod-767d944b6d
-Containers:
-  backend:
-    Container ID:   containerd://b0d932c77f265a1a1657bc81ca05735175cd1da60b6c9adf245bb41138f67f3b
-    Image:          vovinet/13-kubernetes-config_backend
-    Image ID:       docker.io/vovinet/13-kubernetes-config_backend@sha256:c2a2a7c0f8207f5b36ced83547e1f7c2b290d1112ae0fff49c22eb80e5502be8
-    Port:           <none>
-    Host Port:      <none>
-    State:          Running
-      Started:      Mon, 21 Feb 2022 13:47:52 +0300
-    Ready:          True
-    Restart Count:  0
-    Environment Variables from:
-      cs-backend  ConfigMap  Optional: false
-    Environment:  <none>
-    Mounts:
-      /static from static (rw)
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-jjnqf (ro)
-Conditions:
-  Type              Status
-  Initialized       True 
-  Ready             True 
-  ContainersReady   True 
-  PodScheduled      True 
-Volumes:
-  static:
-    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
-    ClaimName:  my-app-prod-pvc
-    ReadOnly:   false
-  kube-api-access-jjnqf:
-    Type:                    Projected (a volume that contains injected data from multiple sources)
-    TokenExpirationSeconds:  3607
-    ConfigMapName:           kube-root-ca.crt
-    ConfigMapOptional:       <nil>
-    DownwardAPI:             true
-QoS Class:                   BestEffort
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type    Reason     Age   From               Message
-  ----    ------     ----  ----               -------
-  Normal  Scheduled  88s   default-scheduler  Successfully assigned my-app-prod/my-app-backend-prod-767d944b6d-t8llv to node1
-  Normal  Pulled     88s   kubelet            Container image "vovinet/13-kubernetes-config_backend" already present on machine
-  Normal  Created    88s   kubelet            Created container backend
-  Normal  Started    87s   kubelet            Started container backend
-
-
 Name:         my-app-backend-prod-767d944b6d-xrldz
 Namespace:    my-app-prod
 Priority:     0
@@ -370,130 +274,6 @@ Node-Selectors:              <none>
 Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                              node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:                      <none>
-
-
-Name:         my-app-frontend-prod-5c499fcf8b-ck7qk
-Namespace:    my-app-prod
-Priority:     0
-Node:         node2/10.10.10.22
-Start Time:   Mon, 21 Feb 2022 13:47:57 +0300
-Labels:       app=my-app-frontend-prod
-              pod-template-hash=5c499fcf8b
-Annotations:  cni.projectcalico.org/containerID: ecb189903274dcb3d1b02b09233f286eee6ee8cb2eeb4cd462fda338fab1a963
-              cni.projectcalico.org/podIP: 10.233.96.22/32
-              cni.projectcalico.org/podIPs: 10.233.96.22/32
-Status:       Running
-IP:           10.233.96.22
-IPs:
-  IP:           10.233.96.22
-Controlled By:  ReplicaSet/my-app-frontend-prod-5c499fcf8b
-Containers:
-  frontend:
-    Container ID:   containerd://bebfd51e241b089d9b29208f15f00912708348e398df19b2543713c71d72e841
-    Image:          vovinet/13-kubernetes-config_frontend
-    Image ID:       docker.io/vovinet/13-kubernetes-config_frontend@sha256:6900c5bfd896b2d2f747fb40dd09b028430f63f2c9b27a8436f31a41203a7636
-    Port:           <none>
-    Host Port:      <none>
-    State:          Running
-      Started:      Mon, 21 Feb 2022 13:47:58 +0300
-    Ready:          True
-    Restart Count:  0
-    Environment Variables from:
-      cs-frontend  ConfigMap  Optional: false
-    Environment:   <none>
-    Mounts:
-      /static from static (rw)
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-gcblz (ro)
-Conditions:
-  Type              Status
-  Initialized       True 
-  Ready             True 
-  ContainersReady   True 
-  PodScheduled      True 
-Volumes:
-  static:
-    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
-    ClaimName:  my-app-prod-pvc
-    ReadOnly:   false
-  kube-api-access-gcblz:
-    Type:                    Projected (a volume that contains injected data from multiple sources)
-    TokenExpirationSeconds:  3607
-    ConfigMapName:           kube-root-ca.crt
-    ConfigMapOptional:       <nil>
-    DownwardAPI:             true
-QoS Class:                   BestEffort
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type    Reason     Age   From               Message
-  ----    ------     ----  ----               -------
-  Normal  Scheduled  83s   default-scheduler  Successfully assigned my-app-prod/my-app-frontend-prod-5c499fcf8b-ck7qk to node2
-  Normal  Pulled     83s   kubelet            Container image "vovinet/13-kubernetes-config_frontend" already present on machine
-  Normal  Created    83s   kubelet            Created container frontend
-  Normal  Started    82s   kubelet            Started container frontend
-
-
-Name:         my-app-frontend-prod-5c499fcf8b-fsm6p
-Namespace:    my-app-prod
-Priority:     0
-Node:         node3/10.10.10.23
-Start Time:   Mon, 21 Feb 2022 13:47:57 +0300
-Labels:       app=my-app-frontend-prod
-              pod-template-hash=5c499fcf8b
-Annotations:  cni.projectcalico.org/containerID: 88bafe8b5d5d48a313f55efa4073b2d361d68eea72ec73655cd560076f7be4e9
-              cni.projectcalico.org/podIP: 10.233.92.30/32
-              cni.projectcalico.org/podIPs: 10.233.92.30/32
-Status:       Running
-IP:           10.233.92.30
-IPs:
-  IP:           10.233.92.30
-Controlled By:  ReplicaSet/my-app-frontend-prod-5c499fcf8b
-Containers:
-  frontend:
-    Container ID:   containerd://9f89f03b45173ffedd85b7621625682d0787ddf5e8f23a3e0be9cc8750f52d2c
-    Image:          vovinet/13-kubernetes-config_frontend
-    Image ID:       docker.io/vovinet/13-kubernetes-config_frontend@sha256:6900c5bfd896b2d2f747fb40dd09b028430f63f2c9b27a8436f31a41203a7636
-    Port:           <none>
-    Host Port:      <none>
-    State:          Running
-      Started:      Mon, 21 Feb 2022 13:47:58 +0300
-    Ready:          True
-    Restart Count:  0
-    Environment Variables from:
-      cs-frontend  ConfigMap  Optional: false
-    Environment:   <none>
-    Mounts:
-      /static from static (rw)
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-bmnjc (ro)
-Conditions:
-  Type              Status
-  Initialized       True 
-  Ready             True 
-  ContainersReady   True 
-  PodScheduled      True 
-Volumes:
-  static:
-    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
-    ClaimName:  my-app-prod-pvc
-    ReadOnly:   false
-  kube-api-access-bmnjc:
-    Type:                    Projected (a volume that contains injected data from multiple sources)
-    TokenExpirationSeconds:  3607
-    ConfigMapName:           kube-root-ca.crt
-    ConfigMapOptional:       <nil>
-    DownwardAPI:             true
-QoS Class:                   BestEffort
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type    Reason     Age   From               Message
-  ----    ------     ----  ----               -------
-  Normal  Scheduled  83s   default-scheduler  Successfully assigned my-app-prod/my-app-frontend-prod-5c499fcf8b-fsm6p to node3
-  Normal  Pulled     82s   kubelet            Container image "vovinet/13-kubernetes-config_frontend" already present on machine
-  Normal  Created    82s   kubelet            Created container frontend
-  Normal  Started    82s   kubelet            Started container frontend
 
 
 Name:         my-app-frontend-prod-5c499fcf8b-n6q86
